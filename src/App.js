@@ -12,10 +12,11 @@ const App = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
-  // Handle date selection (single or range)
   const handleDateChange = (start, end) => {
+    if (!start) return; // Prevents crashes if null
+
     setStartDate(start);
-    setEndDate(end || start); // If no end date, default to start date
+    setEndDate(end || start); // If end is null, use start as end
   };
 
   useEffect(() => {

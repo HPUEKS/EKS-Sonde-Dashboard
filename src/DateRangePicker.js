@@ -7,11 +7,12 @@ const DateRangePicker = ({ onDateChange }) => {
   const [startDate, endDate] = dateRange;
 
   const handleDateChange = (dates) => {
+    if (!dates) return; // Prevents crashes if input is null
+
     let [start, end] = dates;
-    
-    if (!end) {
-      end = start; // If only one date is selected, use it for both
-    }
+
+    if (!start) return; // Prevents breaking if no date is selected
+    if (!end) end = start; // If only one date is picked, set both start and end
 
     setDateRange([start, end]);
     onDateChange(start, end);
@@ -25,7 +26,7 @@ const DateRangePicker = ({ onDateChange }) => {
         onChange={handleDateChange}
         startDate={startDate}
         endDate={endDate}
-        selectsRange={true} // Enable click-and-drag selection
+        selectsRange={true} // Enables drag-to-select for range
         inline
       />
     </div>
