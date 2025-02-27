@@ -1,6 +1,6 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, parse, isAfter, isBefore, isValid } from 'date-fns';
+import { format, parse, isAfter, isBefore, isValid, isSameDay } from 'date-fns';
 
 const SensorChart = ({ title, data, dataKey, color, startDate, endDate }) => {
   if (!data || Object.keys(data).length === 0) {
@@ -16,21 +16,31 @@ const SensorChart = ({ title, data, dataKey, color, startDate, endDate }) => {
     dissolved_oxygen: 'Dissolved Oxygen (mg/L)',
   };
 
-  // Convert the database timestamps into JavaScript Date objects and filter by selected range
+  // Convert timestamps into JavaScript Date objects and filter based on selection
   const filteredData = Object.keys(data)
     .map((timestamp) => {
-      let entryDate = parse(timestamp, 'yyyy-MM-dd_HH-mm-ss', new Date()); // Ensure correct parsing
-      if (!isValid(entryDate)) {
-        console.warn("Invalid timestamp detected:", timestamp);
-        return null; // Skip invalid timestamps
-      }
+      let entryDate = parse(timestamp, 'yyyy-MM-dd_HH-mm-ss', new Date());
+      if (!isValid(entryDate)) return null;
       return {
         time: entryDate,
         [dataKey]: data[timestamp][dataKey],
       };
     })
-    .filter(entry => entry !== null) // Remove invalid entries
-    .filter(({ time }) => (!startDate || isAfter(time, startDate)) && (!endDate || isBefore(time, endDate)));
+    .filter(entry => entry !== null)
+    .filter(({ time }) => {
+      if (!startDate && !endDate) return true;
+
+      const selectedStart = startDate ? new Date(startDate) : null;
+      const selectedEnd = endDate ? new Date(endDate) : selectedStart; // Default endDate to startDate
+
+      // If only a single date is selected, match that date exactly
+      if (selectedStart && isSameDay(time, selectedStart)) {
+        return true;
+      }
+
+      // Otherwise, filter by range
+      return (!startDate || isAfter(time, selectedStart)) && (!endDate || isBefore(time, selectedEnd));
+    });
 
   return (
     <ResponsiveContainer width="100%" height={300}>

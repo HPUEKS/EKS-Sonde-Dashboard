@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/EKS-Sonde-Dashboard/static/css/main.76076f20.css",
+    "main.js": "/EKS-Sonde-Dashboard/static/js/main.51ae6bb4.js",
+    "static/js/488.26e131fa.chunk.js": "/EKS-Sonde-Dashboard/static/js/488.26e131fa.chunk.js",
+    "index.html": "/EKS-Sonde-Dashboard/index.html",
+    "main.76076f20.css.map": "/EKS-Sonde-Dashboard/static/css/main.76076f20.css.map",
+    "main.51ae6bb4.js.map": "/EKS-Sonde-Dashboard/static/js/main.51ae6bb4.js.map",
+    "488.26e131fa.chunk.js.map": "/EKS-Sonde-Dashboard/static/js/488.26e131fa.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.76076f20.css",
+    "static/js/main.51ae6bb4.js"
+  ]
+}

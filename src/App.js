@@ -8,23 +8,25 @@ import "react-datepicker/dist/react-datepicker.css";
 const App = () => {
   const [sensorData, setSensorData] = useState({});
   const [activeTab, setActiveTab] = useState('temperature');
-  const [timeRange, setTimeRange] = useState('Day');  // New state for time range
+  const [timeRange, setTimeRange] = useState('Day'); 
 
   // Date range feature
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
 
+  // Handle date selection (single or range)
   const handleDateChange = (dates) => {
-    const [start, end] = dates;
-    setStartDate(start);
-    setEndDate(end);
+    if (!dates) return;
+
+    let [start, end] = dates;
+    if (!end) end = start; // If only one date is selected, use it for both
+
+    setDateRange([start, end]);
     console.log("Fetching data from:", start, "to", end);
-    // Filter the data accordingly
   };
 
   useEffect(() => {
     const dataRef = ref(database, 'sensor_readings');
-
     onValue(dataRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -41,7 +43,7 @@ const App = () => {
     <Container className="mt-5">
       <h1 className="text-center mb-4">Sensor Dashboard</h1>
 
-      {/* Time Range and Date Range Dropdowns */}
+      {/* Time Range and Date Selection */}
       <div className="d-flex justify-content-center mb-3 gap-3">
         <Dropdown as={ButtonGroup}>
           <Dropdown.Toggle variant="outline-primary">{timeRange}</Dropdown.Toggle>
@@ -55,7 +57,11 @@ const App = () => {
         </Dropdown>
         
         <Dropdown as={ButtonGroup}>
-          <Dropdown.Toggle variant="outline-primary">{startDate && endDate ? `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}` : "Select Date Range"}</Dropdown.Toggle>
+          <Dropdown.Toggle variant="outline-primary">
+            {startDate
+              ? `${startDate.toLocaleDateString()}${endDate && startDate !== endDate ? ` - ${endDate.toLocaleDateString()}` : ""}`
+              : "Select Date Range"}
+          </Dropdown.Toggle>
           <Dropdown.Menu>
             <DatePicker
               selected={startDate}
@@ -86,9 +92,9 @@ const App = () => {
             title={activeTab.replace('_', ' ')} 
             data={sensorData} 
             dataKey={activeTab} 
-            timeRange={timeRange}  // Pass time range to SensorChart
-            startDate={startDate}  // Pass date range to SensorChart
-            endDate={endDate}  // Pass date range to SensorChart
+            timeRange={timeRange}
+            startDate={startDate} 
+            endDate={endDate} 
             color="#4F46E5" 
           />
         </Card.Body>
