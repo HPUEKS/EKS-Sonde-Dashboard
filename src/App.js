@@ -2,27 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Container, Nav, Card, Dropdown, ButtonGroup } from 'react-bootstrap';
 import { database, ref, onValue } from './firebaseConfig';
 import SensorChart from './SensorChart';
-import DatePicker from "react-datepicker";
+import DateRangePicker from "./DateRangePicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const App = () => {
   const [sensorData, setSensorData] = useState({});
   const [activeTab, setActiveTab] = useState('temperature');
   const [timeRange, setTimeRange] = useState('Day'); 
-
-  // Date range feature
-  const [dateRange, setDateRange] = useState([null, null]);
-  const [startDate, endDate] = dateRange;
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   // Handle date selection (single or range)
-  const handleDateChange = (dates) => {
-    if (!dates) return;
-
-    let [start, end] = dates;
-    if (!end) end = start; // If only one date is selected, use it for both
-
-    setDateRange([start, end]);
-    console.log("Fetching data from:", start, "to", end);
+  const handleDateChange = (start, end) => {
+    setStartDate(start);
+    setEndDate(end || start); // If no end date, default to start date
   };
 
   useEffect(() => {
@@ -63,14 +56,7 @@ const App = () => {
               : "Select Date Range"}
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            <DatePicker
-              selected={startDate}
-              onChange={handleDateChange}
-              startDate={startDate}
-              endDate={endDate}
-              selectsRange
-              inline
-            />
+            <DateRangePicker onDateChange={handleDateChange} />
           </Dropdown.Menu>
         </Dropdown>
       </div>

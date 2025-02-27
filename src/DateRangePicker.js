@@ -3,24 +3,29 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const DateRangePicker = ({ onDateChange }) => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  
-  const handleDateChange = (date) => {
-    setStartDate(date);
-    setEndDate(date); // If only one date is selected, set both start and end to the same date
-    onDateChange(date, date); // Pass the same date as both values
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
+
+  const handleDateChange = (dates) => {
+    let [start, end] = dates;
+    
+    if (!end) {
+      end = start; // If only one date is selected, use it for both
+    }
+
+    setDateRange([start, end]);
+    onDateChange(start, end);
   };
 
   return (
     <div>
-      <label>Select Date:</label>
+      <label>Select Date Range:</label>
       <DatePicker
         selected={startDate}
         onChange={handleDateChange}
         startDate={startDate}
         endDate={endDate}
-        selectsRange={false} // Disable range selection
+        selectsRange={true} // Enable click-and-drag selection
         inline
       />
     </div>
