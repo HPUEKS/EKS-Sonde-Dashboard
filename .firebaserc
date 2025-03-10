@@ -1,0 +1,5 @@
+{
+  "projects": {
+    "default": "hpu-eks-sonde"
+  }
+}
