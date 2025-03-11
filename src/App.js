@@ -2,42 +2,59 @@ import React, { useState, useEffect } from 'react';
 import { Container, Nav, Card, Dropdown, ButtonGroup } from 'react-bootstrap';
 import { database, ref, onValue } from './firebaseConfig';
 import SensorChart from './SensorChart';
-import DateRangePicker from "./DateRangePicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { parse, subDays, subWeeks, subMonths, subYears, isAfter } from 'date-fns';
 
 const App = () => {
   const [sensorData, setSensorData] = useState({});
   const [activeTab, setActiveTab] = useState('temperature');
-  const [timeRange, setTimeRange] = useState('Day'); 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [timeRange, setTimeRange] = useState('Day');
 
-  const handleDateChange = (start, end) => {
-    if (!start) return; // Prevents crashes if null
-
-    setStartDate(start);
-    setEndDate(end || start); // If end is null, use start as end
-  };
-
+  // Firebase data fetching and timestamp formatting
   useEffect(() => {
     const dataRef = ref(database, 'sensor_readings');
+
     onValue(dataRef, (snapshot) => {
       const data = snapshot.val();
+      console.log("Raw Firebase Data:", data);
+
       if (data) {
-        setSensorData(data);
+        try {
+          const formattedData = Object.keys(data).reduce((acc, timestamp) => {
+            const parsedDate = parse(timestamp, 'yyyy-MM-dd_HH-mm-ss', new Date());
+
+            if (!isNaN(parsedDate)) {
+              acc[timestamp] = {
+                time: parsedDate,
+                ...data[timestamp]
+              };
+            } else {
+              console.error("Invalid timestamp format:", timestamp);
+            }
+
+            return acc;
+          }, {});
+
+          console.log("Formatted Data for Graphs:", formattedData);
+          setSensorData(formattedData);
+        } catch (error) {
+          console.error("Error Processing Data:", error);
+          setSensorData({});
+        }
+      } else {
+        console.warn("No data found in Firebase.");
+        setSensorData({});
       }
+    }, (error) => {
+      console.error("Firebase Read Error:", error);
     });
   }, []);
-
-  const handleSelect = (selectedKey) => {
-    setActiveTab(selectedKey);
-  };
 
   return (
     <Container className="mt-5">
       <h1 className="text-center mb-4">Sensor Dashboard</h1>
 
-      {/* Time Range and Date Selection */}
+      {/* Time Range Selection */}
       <div className="d-flex justify-content-center mb-3 gap-3">
         <Dropdown as={ButtonGroup}>
           <Dropdown.Toggle variant="outline-primary">{timeRange}</Dropdown.Toggle>
@@ -49,21 +66,13 @@ const App = () => {
             ))}
           </Dropdown.Menu>
         </Dropdown>
-        
-        <Dropdown as={ButtonGroup}>
-          <Dropdown.Toggle variant="outline-primary">
-            {startDate
-              ? `${startDate.toLocaleDateString()}${endDate && startDate !== endDate ? ` - ${endDate.toLocaleDateString()}` : ""}`
-              : "Select Date Range"}
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            <DateRangePicker onDateChange={handleDateChange} />
-          </Dropdown.Menu>
-        </Dropdown>
       </div>
 
       {/* Sensor Tabs */}
-      <Nav variant="tabs" activeKey={activeTab} onSelect={handleSelect} className="justify-content-center mb-4">
+      <Nav variant="tabs" activeKey={activeTab} onSelect={(selectedKey) => {
+    console.log("Tab changed to:", selectedKey);
+    setActiveTab(selectedKey);
+}} className="justify-content-center mb-4">
         <Nav.Item><Nav.Link eventKey="temperature">Temperature</Nav.Link></Nav.Item>
         <Nav.Item><Nav.Link eventKey="conductivity">Conductivity</Nav.Link></Nav.Item>
         <Nav.Item><Nav.Link eventKey="salinity">Salinity</Nav.Link></Nav.Item>
@@ -71,18 +80,16 @@ const App = () => {
         <Nav.Item><Nav.Link eventKey="dissolved_oxygen">Dissolved Oxygen</Nav.Link></Nav.Item>
       </Nav>
 
-      {/* Chart */}
-      <Card className="shadow-sm">
+      {/* Sensor Chart */}
+      <Card className="shadow-sm mt-3">
         <Card.Body>
           <Card.Title>{activeTab.replace('_', ' ').toUpperCase()}</Card.Title>
           <SensorChart 
             title={activeTab.replace('_', ' ')} 
             data={sensorData} 
             dataKey={activeTab} 
-            timeRange={timeRange}
-            startDate={startDate} 
-            endDate={endDate} 
             color="#4F46E5" 
+            timeRange={timeRange}
           />
         </Card.Body>
       </Card>
