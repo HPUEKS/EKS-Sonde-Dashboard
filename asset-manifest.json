@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/EKS-Sonde-Dashboard/static/css/main.20560d40.css",
-    "main.js": "/EKS-Sonde-Dashboard/static/js/main.de2aa9ed.js",
+    "main.css": "/EKS-Sonde-Dashboard/static/css/main.d90fc3fa.css",
+    "main.js": "/EKS-Sonde-Dashboard/static/js/main.aa85dd7d.js",
     "static/js/488.32a8031f.chunk.js": "/EKS-Sonde-Dashboard/static/js/488.32a8031f.chunk.js",
     "index.html": "/EKS-Sonde-Dashboard/index.html",
-    "main.20560d40.css.map": "/EKS-Sonde-Dashboard/static/css/main.20560d40.css.map",
-    "main.de2aa9ed.js.map": "/EKS-Sonde-Dashboard/static/js/main.de2aa9ed.js.map",
+    "main.d90fc3fa.css.map": "/EKS-Sonde-Dashboard/static/css/main.d90fc3fa.css.map",
+    "main.aa85dd7d.js.map": "/EKS-Sonde-Dashboard/static/js/main.aa85dd7d.js.map",
     "488.32a8031f.chunk.js.map": "/EKS-Sonde-Dashboard/static/js/488.32a8031f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.20560d40.css",
-    "static/js/main.de2aa9ed.js"
+    "static/css/main.d90fc3fa.css",
+    "static/js/main.aa85dd7d.js"
   ]
 }
