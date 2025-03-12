@@ -2,15 +2,54 @@ import React, { useState, useEffect } from 'react';
 import { Container, Nav, Card, Dropdown, ButtonGroup } from 'react-bootstrap';
 import { database, ref, onValue } from './firebaseConfig';
 import SensorChart from './SensorChart';
+import DateRangePicker from "./DateRangePicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { parse, subDays, subWeeks, subMonths, subYears, isAfter } from 'date-fns';
+import { parse, subDays, subWeeks, subMonths, subYears } from 'date-fns';
 
 const App = () => {
   const [sensorData, setSensorData] = useState({});
   const [activeTab, setActiveTab] = useState('temperature');
   const [timeRange, setTimeRange] = useState('Day');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
-  // Firebase data fetching and timestamp formatting
+  // Handle Time Range Selection
+  const handleTimeRangeChange = (range) => {
+    setTimeRange(range);
+
+    // Reset manual date selection when a time range is chosen
+    let newStartDate = null;
+    let newEndDate = new Date();
+
+    switch (range) {
+      case 'Day':
+        newStartDate = subDays(newEndDate, 1);
+        break;
+      case 'Week':
+        newStartDate = subWeeks(newEndDate, 1);
+        break;
+      case 'Month':
+        newStartDate = subMonths(newEndDate, 1);
+        break;
+      case 'Year':
+        newStartDate = subYears(newEndDate, 1);
+        break;
+      default:
+        newStartDate = subDays(newEndDate, 1);
+    }
+
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
+  };
+
+  // Handle Manual Date Selection
+  const handleDateChange = (start, end) => {
+    setStartDate(start);
+    setEndDate(end);
+    setTimeRange(null); // Disable auto range selection when manually picking dates
+  };
+
+  // Fetch Firebase Data
   useEffect(() => {
     const dataRef = ref(database, 'sensor_readings');
 
@@ -54,25 +93,28 @@ const App = () => {
     <Container className="mt-5">
       <h1 className="text-center mb-4">Sensor Dashboard</h1>
 
-      {/* Time Range Selection */}
+      {/* Time Range Selection & Date Picker */}
       <div className="d-flex justify-content-center mb-3 gap-3">
         <Dropdown as={ButtonGroup}>
-          <Dropdown.Toggle variant="outline-primary">{timeRange}</Dropdown.Toggle>
+          <Dropdown.Toggle variant="outline-primary">{timeRange || "Custom"}</Dropdown.Toggle>
           <Dropdown.Menu>
             {["Day", "Week", "Month", "Year"].map(range => (
-              <Dropdown.Item key={range} onClick={() => setTimeRange(range)}>
+              <Dropdown.Item key={range} onClick={() => handleTimeRangeChange(range)}>
                 {range}
               </Dropdown.Item>
             ))}
           </Dropdown.Menu>
         </Dropdown>
+        
+        {/* Date Picker */}
+        <DateRangePicker onDateChange={handleDateChange} />
       </div>
 
       {/* Sensor Tabs */}
       <Nav variant="tabs" activeKey={activeTab} onSelect={(selectedKey) => {
-    console.log("Tab changed to:", selectedKey);
-    setActiveTab(selectedKey);
-}} className="justify-content-center mb-4">
+        console.log("Tab changed to:", selectedKey);
+        setActiveTab(selectedKey);
+      }} className="justify-content-center mb-4">
         <Nav.Item><Nav.Link eventKey="temperature">Temperature</Nav.Link></Nav.Item>
         <Nav.Item><Nav.Link eventKey="conductivity">Conductivity</Nav.Link></Nav.Item>
         <Nav.Item><Nav.Link eventKey="salinity">Salinity</Nav.Link></Nav.Item>
@@ -90,6 +132,8 @@ const App = () => {
             dataKey={activeTab} 
             color="#4F46E5" 
             timeRange={timeRange}
+            startDate={startDate} 
+            endDate={endDate}
           />
         </Card.Body>
       </Card>

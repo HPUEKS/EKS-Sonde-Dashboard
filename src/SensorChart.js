@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, subDays, subWeeks, subMonths, subYears, isAfter } from 'date-fns';
+import { format, subDays, subWeeks, subMonths, subYears, isAfter, isBefore } from 'date-fns';
 
-const SensorChart = ({ title, data, dataKey, color, timeRange }) => {
+const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDate }) => {
   const now = new Date();
 
   // Define Y-axis labels for different sensors
@@ -14,8 +14,8 @@ const SensorChart = ({ title, data, dataKey, color, timeRange }) => {
     dissolved_oxygen: 'Dissolved Oxygen (mg/L)',
   };
 
-  // Get the appropriate start date based on the selected range
-  const startDate = useMemo(() => {
+  // Get the default start date based on the selected range
+  const defaultStartDate = useMemo(() => {
     switch (timeRange) {
       case 'Day': return subDays(now, 1);
       case 'Week': return subWeeks(now, 1);
@@ -25,32 +25,43 @@ const SensorChart = ({ title, data, dataKey, color, timeRange }) => {
     }
   }, [timeRange]);
 
-  // ✅ Optimize data processing with useMemo
+  // Use user-selected start/end dates or default to time range selection
+  const finalStartDate = startDate || defaultStartDate;
+  const finalEndDate = endDate || now;
+
+  // Optimize data processing with useMemo
   const chartData = useMemo(() => {
+    if (!data || Object.keys(data).length === 0) return [];
+  
     return Object.keys(data)
       .map((timestamp) => {
         const entry = data[timestamp];
-
-        // ✅ Ensure time exists and is a valid date
-        let parsedDate;
-        if (typeof entry.time === "string") {
-          parsedDate = new Date(entry.time); // Convert string to Date
-        } else if (entry.time instanceof Date) {
-          parsedDate = entry.time; // Already a Date object
-        } else {
-          console.error("❌ Invalid time format:", entry.time);
-          return null; // Skip invalid data points
+        const parsedDate = new Date(entry.time);
+  
+        if (isNaN(parsedDate.getTime())) return null;
+  
+        // ✅ Fix: Ensure single-day selection properly includes the full day's data
+        if (startDate && endDate) {
+          const startOfDay = new Date(startDate);
+          startOfDay.setHours(0, 0, 0, 0);
+  
+          const endOfDay = new Date(endDate);
+          endOfDay.setHours(23, 59, 59, 999);
+  
+          if (!(parsedDate >= startOfDay && parsedDate <= endOfDay)) {
+            return null;
+          }
         }
-
-        return {
-          time: parsedDate,
-          [dataKey]: entry[dataKey] || 0, // Handle missing values
-        };
+  
+        return { time: parsedDate, [dataKey]: entry[dataKey] || 0 };
       })
-      .filter((entry) => entry !== null && isAfter(entry.time, startDate)); // ✅ Remove invalid entries
-  }, [data, dataKey, startDate]);
+      .filter((entry) => entry !== null);
+  }, [data, dataKey, startDate, endDate]);
+  
+  
+  
 
-  console.log(`📊 Processed Data for ${title}:`, chartData); // Debugging
+  console.log(`Processed Data for ${title}:`, chartData); // Debugging
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -67,11 +78,11 @@ const SensorChart = ({ title, data, dataKey, color, timeRange }) => {
 
         {/* Y-Axis with dynamic label */}
         <YAxis
-          label={{ 
-            value: yAxisLabels[dataKey] || 'Sensor Value', 
-            angle: -90, 
-            position: 'insideLeft', 
-            style: { textAnchor: 'middle' } 
+          label={{
+            value: yAxisLabels[dataKey] || 'Sensor Value',
+            angle: -90,
+            position: 'insideLeft',
+            style: { textAnchor: 'middle' }
           }}
         />
 

@@ -1,0 +1,51 @@
+.date-picker-wrapper {
+    position: relative;
+  }
+  
+  .custom-date-picker {
+    background-color: white !important;
+    border: 1px solid #0d6efd !important;
+    border-radius: 5px !important;
+    padding: 6px 12px !important;
+    font-size: 16px !important;
+    color: #0d6efd !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    width: 180px !important;
+    transition: all 0.3s ease-in-out !important;
+    box-shadow: none !important;
+  }
+  
+  .custom-date-picker:hover,
+  .custom-date-picker:focus {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border: 1px solid #0d6efd !important;
+    outline: none !important;
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.5) !important;
+  }
+  
+  /* Reset Button Inside Calendar */
+  .reset-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+  }
+  
+  .reset-button {
+    background-color: transparent;
+    border: 1px solid #6c757d;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 16px;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .reset-button:hover {
+    background-color: #6c757d;
+    color: white;
+  }
+  
