@@ -6,21 +6,25 @@ import "./DateRangePicker.css";
 const DateRangePicker = ({ onDateChange }) => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [startDate, endDate] = dateRange;
+  const [selectingEnd, setSelectingEnd] = useState(false); // Track if selecting start or end date
 
   const handleChange = (dates) => {
     let [start, end] = dates;
 
-    // ✅ Fix: Ensure single-day selection still works
     if (start && !end) {
-      end = new Date(start); // Explicitly set end date to the same day
+      // If a second date isn't selected yet, track that the user is selecting the end date next
+      setSelectingEnd(true);
+    } else if (start && end) {
+      setSelectingEnd(false); // User has selected both dates, reset tracking
     }
 
     setDateRange([start, end]);
-    onDateChange(start, end);
+    onDateChange(start, end || start);
   };
 
   const handleReset = () => {
     setDateRange([null, null]);
+    setSelectingEnd(false);
     onDateChange(null, null);
   };
 

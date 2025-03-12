@@ -40,7 +40,7 @@ const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDat
   
         if (isNaN(parsedDate.getTime())) return null;
   
-        // ✅ Fix: Ensure single-day selection properly includes the full day's data
+        // ✅ Fix: Allow both single-day and range selection
         if (startDate && endDate) {
           const startOfDay = new Date(startDate);
           startOfDay.setHours(0, 0, 0, 0);
@@ -57,8 +57,6 @@ const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDat
       })
       .filter((entry) => entry !== null);
   }, [data, dataKey, startDate, endDate]);
-  
-  
   
 
   console.log(`Processed Data for ${title}:`, chartData); // Debugging
