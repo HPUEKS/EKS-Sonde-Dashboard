@@ -6,6 +6,9 @@ import DateRangePicker from "./DateRangePicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parse, subDays, subWeeks, subMonths, subYears } from 'date-fns';
 
+// HPU Logo Path (Stored in public/)
+const logoPath = process.env.PUBLIC_URL + "/hpuLogo.png";
+
 const App = () => {
   const [sensorData, setSensorData] = useState({});
   const [activeTab, setActiveTab] = useState('temperature');
@@ -16,8 +19,6 @@ const App = () => {
   // Handle Time Range Selection
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
-
-    // Reset manual date selection when a time range is chosen
     let newStartDate = null;
     let newEndDate = new Date();
 
@@ -46,7 +47,7 @@ const App = () => {
   const handleDateChange = (start, end) => {
     setStartDate(start);
     setEndDate(end);
-    setTimeRange(null); // Disable auto range selection when manually picking dates
+    setTimeRange(null); // Switch to "Custom" mode when manually selecting dates
   };
 
   // Fetch Firebase Data
@@ -91,6 +92,8 @@ const App = () => {
 
   return (
     <Container className="mt-5">
+      {/* HPU Logo */}
+
       <h1 className="text-center mb-4">Sensor Dashboard</h1>
 
       {/* Time Range Selection & Date Picker */}
