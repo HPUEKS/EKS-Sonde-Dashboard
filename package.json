@@ -1,8 +1,8 @@
 {
+  "homepage": "https://hpueks.github.io/EKS-Sonde-Dashboard",
   "name": "eks-sonde-dashboard",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://HPUEKS.github.io/EKS-Sonde-Dashboard",
   "dependencies": {
     "bootstrap": "^5.3.3",
     "date-fns": "^4.1.0",
