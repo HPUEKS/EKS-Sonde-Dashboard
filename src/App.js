@@ -123,6 +123,8 @@ const App = () => {
         <Nav.Item><Nav.Link eventKey="salinity">Salinity</Nav.Link></Nav.Item>
         <Nav.Item><Nav.Link eventKey="dissolved_solids">Dissolved Solids</Nav.Link></Nav.Item>
         <Nav.Item><Nav.Link eventKey="dissolved_oxygen">Dissolved Oxygen</Nav.Link></Nav.Item>
+        {/* 🔹 NEW TAB */}
+        <Nav.Item><Nav.Link eventKey="water_level">Water Level</Nav.Link></Nav.Item>
       </Nav>
 
       {/* Sensor Chart */}

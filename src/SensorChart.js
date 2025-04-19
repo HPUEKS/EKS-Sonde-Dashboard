@@ -1,6 +1,20 @@
 import React, { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, subDays, subWeeks, subMonths, subYears, isAfter, isBefore } from 'date-fns';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
+import {
+  format,
+  subDays,
+  subWeeks,
+  subMonths,
+  subYears
+} from 'date-fns';
 
 const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDate }) => {
   const now = new Date();
@@ -12,6 +26,7 @@ const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDat
     salinity: 'Salinity (ppt)',
     dissolved_solids: 'Total Dissolved Solids (mg/L)',
     dissolved_oxygen: 'Dissolved Oxygen (mg/L)',
+    water_level: 'Water Level (m)' // ✅ Updated to meters
   };
 
   // Get the default start date based on the selected range
@@ -25,39 +40,32 @@ const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDat
     }
   }, [timeRange]);
 
-  // Use user-selected start/end dates or default to time range selection
+  // Final date range to apply (custom or default)
   const finalStartDate = startDate || defaultStartDate;
   const finalEndDate = endDate || now;
 
   // Optimize data processing with useMemo
   const chartData = useMemo(() => {
     if (!data || Object.keys(data).length === 0) return [];
-  
+
     return Object.keys(data)
       .map((timestamp) => {
         const entry = data[timestamp];
         const parsedDate = new Date(entry.time);
-  
         if (isNaN(parsedDate.getTime())) return null;
-  
-        // ✅ Fix: Allow both single-day and range selection
-        if (startDate && endDate) {
-          const startOfDay = new Date(startDate);
-          startOfDay.setHours(0, 0, 0, 0);
-  
-          const endOfDay = new Date(endDate);
-          endOfDay.setHours(23, 59, 59, 999);
-  
-          if (!(parsedDate >= startOfDay && parsedDate <= endOfDay)) {
-            return null;
-          }
-        }
-  
-        return { time: parsedDate, [dataKey]: entry[dataKey] || 0 };
+
+        // ✅ Filter by date range
+        if (!(parsedDate >= finalStartDate && parsedDate <= finalEndDate)) return null;
+
+        // ✅ Convert water level from cm to m
+        const value = dataKey === 'water_level'
+          ? (entry[dataKey] || 0) / 100
+          : entry[dataKey] || 0;
+
+        return { time: parsedDate, [dataKey]: value };
       })
       .filter((entry) => entry !== null);
-  }, [data, dataKey, startDate, endDate]);
-  
+  }, [data, dataKey, finalStartDate, finalEndDate]);
 
   console.log(`Processed Data for ${title}:`, chartData); // Debugging
 
@@ -65,16 +73,12 @@ const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDat
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" />
-
-        {/* X-Axis with label */}
         <XAxis
           dataKey="time"
           tickFormatter={(time) => format(time, 'MMM d, HH:mm')}
           tick={{ fontSize: 12 }}
           label={{ value: 'Time', position: 'insideBottom', offset: -5 }}
         />
-
-        {/* Y-Axis with dynamic label */}
         <YAxis
           label={{
             value: yAxisLabels[dataKey] || 'Sensor Value',
@@ -83,9 +87,14 @@ const SensorChart = ({ title, data, dataKey, color, timeRange, startDate, endDat
             style: { textAnchor: 'middle' }
           }}
         />
-
         <Tooltip labelFormatter={(time) => format(time, 'PPPpp')} />
-        <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} />
+        <Line
+          type="monotone"
+          dataKey={dataKey}
+          stroke={color}
+          strokeWidth={2}
+          dot={false}
+        />
       </LineChart>
     </ResponsiveContainer>
   );
